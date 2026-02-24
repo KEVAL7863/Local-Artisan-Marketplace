@@ -1,0 +1,88 @@
+@model List<Local_Artisan_MarketPlace.Controllers.AdminUserViewModel>
+@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<div class="container-fluid py-4">
+    <h1 class="mb-4">Admin Panel</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text display-6">@ViewBag.TotalUsers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Shoppers</h5>
+                    <p class="card-text display-6">@ViewBag.ShopperCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Artisans</h5>
+                    <p class="card-text display-6">@ViewBag.ArtisanCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Admins</h5>
+                    <p class="card-text display-6">@ViewBag.AdminCount</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">All Users</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Account Type</th>
+                            <th>Business Name</th>
+                            <th>Artisan Type</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.FullName</td>
+                                <td>@user.Email</td>
+                                <td><span class="badge bg-secondary">@user.AccountType</span></td>
+                                <td>@(user.BusinessName ?? "-")</td>
+                                <td>@(user.ArtisanType ?? "-")</td>
+                                <td>
+                                    @if (user.IsAdmin)
+                                    {
+                                        <span class="badge bg-danger">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark">User</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,110 @@
+@model Local_Artisan_MarketPlace.Controllers.ShippingViewModel
+@{
+    ViewData["Title"] = "Shipping";
+    Layout = "_ShopLayout";
+    var cart = ViewBag.Cart as List<Local_Artisan_MarketPlace.Models.CartItem> ?? new List<Local_Artisan_MarketPlace.Models.CartItem>();
+    var subtotal = (decimal)ViewBag.Subtotal;
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Cart</a></li>
+        <li class="breadcrumb-item active">Shipping</li>
+        <li class="breadcrumb-item">Payment</li>
+        <li class="breadcrumb-item">Review</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-lg-8">
+        <h4 class="mb-4">Shipping Information</h4>
+        <form asp-action="Shipping" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">First Name</label>
+                    <input asp-for="FirstName" class="form-control" placeholder="Enter first name" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" placeholder="Enter last name" required />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    <input asp-for="Address" class="form-control" placeholder="Enter address" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">City</label>
+                    <input asp-for="City" class="form-control" placeholder="Enter city" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">State</label>
+                    <input asp-for="State" class="form-control" placeholder="Enter state" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">ZIP Code</label>
+                    <input asp-for="ZipCode" class="form-control" placeholder="Enter ZIP code" required />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Phone Number</label>
+                    <input asp-for="Phone" class="form-control" placeholder="Enter phone number" required />
+                </div>
+            </div>
+            <h4 class="mt-4 mb-3">Delivery Method</h4>
+            <div class="form-check border rounded p-3 mb-2">
+                <input asp-for="ShippingMethod" type="radio" value="Standard" class="form-check-input" id="std" checked />
+                <label class="form-check-label w-100" for="std">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>Standard Shipping</strong>
+                            <div class="small text-muted">4-7 Business Days</div>
+                        </div>
+                        <span class="text-success">FREE</span>
+                    </div>
+                </label>
+            </div>
+            <div class="form-check border rounded p-3 mb-3">
+                <input asp-for="ShippingMethod" type="radio" value="Express" class="form-check-input" id="exp" />
+                <label class="form-check-label w-100" for="exp">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>Express Shipping</strong>
+                            <div class="small text-muted">1-2 Business Days</div>
+                        </div>
+                        <span>₹250.00</span>
+                    </div>
+                </label>
+            </div>
+            <a asp-controller="Cart" asp-action="Index" class="btn btn-link p-0"><i class="fas fa-arrow-left me-1"></i>RETURN TO CART</a>
+            <button type="submit" class="btn btn-artisan ms-3">CONTINUE TO PAYMENT</button>
+        </form>
+    </div>
+    <div class="col-lg-4">
+        <div class="order-summary-box">
+            <h5 class="mb-3">Order Summary</h5>
+            @foreach (var item in cart)
+            {
+                <div class="d-flex align-items-center mb-3">
+                    <img src="@(item.ProductImageUrl ?? "/images/placeholder.png")" class="cart-item-img me-2" alt="" />
+                    <div class="flex-grow-1">
+                        <div class="small text-muted">@(item.CategoryName ?? "")</div>
+                        <strong>@item.ProductName</strong>
+                        <div>₹@item.TotalPrice.ToString("N2") × @item.Quantity</div>
+                    </div>
+                    <span>₹@item.TotalPrice.ToString("N2")</span>
+                </div>
+            }
+            <hr />
+            <div class="d-flex justify-content-between mb-2"><span>Subtotal</span><span>₹@subtotal.ToString("N2")</span></div>
+            <div class="d-flex justify-content-between mb-2"><span>Estimated Shipping</span><span class="text-success">FREE</span></div>
+            <div class="d-flex justify-content-between mb-2"><span>Estimated Taxes</span><span>₹@((subtotal * 0.065m).ToString("N2"))</span></div>
+            <hr />
+            <div class="d-flex justify-content-between mb-3"><strong>Total</strong><strong>₹@((subtotal + (subtotal * 0.065m)).ToString("N2"))</strong></div>
+            <div class="small">
+                <p class="mb-1"><i class="fas fa-lock me-2"></i><strong>SECURE CHECKOUT</strong></p>
+                <p class="text-muted small">Your personal information is encrypted and processed securely.</p>
+                <p class="mb-1"><i class="fas fa-heart me-2"></i><strong>SUPPORT LOCAL</strong></p>
+                <p class="text-muted small">Your purchase directly supports independent artisans and creators.</p>
+            </div>
+        </div>
+    </div>
+</div>
+

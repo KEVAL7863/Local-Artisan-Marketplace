@@ -1,0 +1,75 @@
+/* Artisan Market - Shop Theme */
+:root {
+    --primary-brown: #8B6F47;
+    --dark-brown: #5C4033;
+    --cream-bg: #F5F1EB;
+    --warm-beige: #E8DDD0;
+    --text-dark: #2C2C2C;
+    --text-muted: #6B6B6B;
+}
+
+.shop-header {
+    background: var(--dark-brown);
+    color: white;
+    padding: 1rem 0;
+}
+.shop-header .navbar-brand { color: white !important; font-weight: 700; }
+.shop-header .nav-link { color: rgba(255,255,255,0.9) !important; }
+.shop-header .nav-link:hover { color: white !important; }
+.shop-header .cart-badge {
+    background: var(--primary-brown);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 50%;
+    font-size: 0.75rem;
+}
+
+.breadcrumb { background: transparent; padding: 0.5rem 0; }
+.breadcrumb-item + .breadcrumb-item::before { color: var(--text-muted); }
+
+.product-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.product-card img { height: 250px; object-fit: cover; }
+.product-card .card-title { color: var(--text-dark); font-weight: 600; }
+.product-card .price { color: var(--primary-brown); font-weight: 700; font-size: 1.1rem; }
+
+.btn-artisan {
+    background: var(--primary-brown);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+.btn-artisan:hover { background: var(--dark-brown); color: white; }
+
+.shop-footer {
+    background: var(--dark-brown);
+    color: white;
+    padding: 3rem 0 1.5rem;
+    margin-top: 4rem;
+}
+.shop-footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+.shop-footer a:hover { color: white; }
+.shop-footer .footer-title { font-weight: 600; margin-bottom: 1rem; font-size: 0.9rem; }
+
+.cart-item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+.qty-btn { width: 36px; height: 36px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; }
+.qty-input { width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 6px; }
+
+.order-summary-box {
+    background: var(--cream-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+.star-rating { color: #E8A838; }
+.review-card { border-radius: 12px; border: 1px solid #eee; padding: 1.25rem; }
+

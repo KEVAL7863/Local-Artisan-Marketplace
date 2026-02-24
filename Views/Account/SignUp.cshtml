@@ -1,0 +1,149 @@
+@model Local_Artisan_MarketPlace.Models.SignUpViewModel
+@{
+    ViewData["Title"] = "Create Account";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ArtisanMarket</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Section - Promotional -->
+        <div class="auth-left">
+            <div class="auth-left-content">
+                <div class="badge">Est. 2024</div>
+                <h2 class="promo-headline">Support the craft of tomorrow.</h2>
+                <p class="promo-description">Join a global community of artisans and collectors. Discover unique, handcrafted treasures made with passion and precision.</p>
+                <div class="community-info">
+                    <div class="avatar-group">
+                        <div class="avatar"></div>
+                        <div class="avatar"></div>
+                        <div class="avatar"></div>
+                    </div>
+                    <span>Joined by 10k+ creators</span>
+                </div>
+                <div class="copyright">HANDCRAFTED MARKETPLACE © 2024</div>
+            </div>
+        </div>
+
+        <!-- Right Section - Sign Up Form -->
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <div class="brand-icon">A</div>
+                <h2 class="auth-title">Create your account</h2>
+                <p class="auth-subtitle">Join our vibrant community of creators and shoppers today.</p>
+
+                <form asp-action="SignUp" method="post" class="auth-form">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- Account Type Selection -->
+                    <div class="account-type-selection">
+                        <input type="radio" asp-for="AccountType" value="Shopper" id="accountTypeShopper" checked class="account-type-radio" />
+                        <label for="accountTypeShopper" class="account-type-card">
+                            <i class="fas fa-shopping-bag account-type-icon"></i>
+                            <div class="account-type-label">Shopper</div>
+                            <div class="account-type-desc">I want to buy</div>
+                        </label>
+
+                        <input type="radio" asp-for="AccountType" value="Artisan" id="accountTypeArtisan" class="account-type-radio" />
+                        <label for="accountTypeArtisan" class="account-type-card">
+                            <i class="fas fa-paint-brush account-type-icon"></i>
+                            <div class="account-type-label">Artisan</div>
+                            <div class="account-type-desc">I want to sell</div>
+                        </label>
+
+                        <input type="radio" asp-for="AccountType" value="Admin" id="accountTypeAdmin" class="account-type-radio" />
+                        <label for="accountTypeAdmin" class="account-type-card">
+                            <i class="fas fa-user-shield account-type-icon"></i>
+                            <div class="account-type-label">Admin</div>
+                            <div class="account-type-desc">I want to manage</div>
+                        </label>
+                    </div>
+                    <span asp-validation-for="AccountType" class="text-danger"></span>
+
+                    <div class="form-group">
+                        <label asp-for="FullName" class="form-label">Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                        </div>
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email" class="form-label">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-at input-icon"></i>
+                            <input asp-for="Email" class="form-control" placeholder="Enter your email address" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input asp-for="Password" class="form-control" type="password" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-eye input-icon"></i>
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input asp-for="AgreeToTerms" class="form-check-input" type="checkbox" required />
+                            <label asp-for="AgreeToTerms" class="form-check-label">
+                                I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>.
+                            </label>
+                        </div>
+                        <span asp-validation-for="AgreeToTerms" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn-auth-primary">Create Account →</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a asp-action="Login" class="auth-link">Sign in here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        // Handle account type selection styling
+        document.querySelectorAll('.account-type-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.account-type-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                if (this.checked) {
+                    this.nextElementSibling.classList.add('selected');
+                }
+            });
+        });
+        // Set initial selected state
+        document.querySelector('.account-type-radio:checked')?.nextElementSibling.classList.add('selected');
+    </script>
+</body>
+</html>
+

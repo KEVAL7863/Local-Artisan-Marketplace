@@ -1,0 +1,133 @@
+@model Local_Artisan_MarketPlace.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "_ShopLayout";
+    var thumbnails = (Model.ThumbnailUrls ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries);
+    if (thumbnails.Length == 0 && !string.IsNullOrEmpty(Model.ImageUrl)) { thumbnails = new[] { Model.ImageUrl }; }
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Shop" asp-action="Index">@(Model.Category?.Name ?? "Shop")</a></li>
+        <li class="breadcrumb-item active">@Model.Name</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <img src="@(Model.ImageUrl ?? "/images/placeholder.png")" class="img-fluid rounded" alt="@Model.Name" style="max-height: 500px; object-fit: cover;" />
+        @if (thumbnails.Length > 0)
+        {
+            <div class="d-flex gap-2 mt-2">
+                @foreach (var thumb in thumbnails.Take(4))
+                {
+                    <img src="@thumb.Trim()" class="rounded" style="width: 80px; height: 80px; object-fit: cover;" alt="" />
+                }
+            </div>
+        }
+    </div>
+    <div class="col-lg-6">
+        @if (!string.IsNullOrEmpty(Model.Collection))
+        { <span class="badge bg-secondary mb-2">@Model.Collection.ToUpper()</span> }
+        <h1 class="h2 mb-3">@Model.Name</h1>
+        <div class="star-rating mb-2">
+            @for (var i = 0; i < 5; i++) { <i class="fas fa-star@(i < (int)Model.Rating ? "" : "-half-alt")"></i> }
+            <span class="text-muted ms-2">@Model.Rating.ToString("N1") (@Model.ReviewCount reviews)</span>
+        </div>
+        <p class="h4 text-primary mb-3">₹@Model.Price.ToString("N2")</p>
+        <p class="text-muted">@Model.Description</p>
+        @if (!string.IsNullOrEmpty(Model.Dimensions))
+        {
+            <p><strong>Usage & Dimensions:</strong> @Model.Dimensions</p>
+        }
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="d-flex align-items-center border rounded">
+                <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+                <input type="number" id="qty" class="qty-input border-0" value="1" min="1" max="@Model.StockQuantity" readonly />
+                <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+            <span class="text-muted small">Only @Model.StockQuantity left in stock</span>
+        </div>
+        <form asp-action="AddToCart" method="post" class="mb-4" id="addToCartForm">
+            <input type="hidden" name="productId" value="@Model.Id" />
+            <input type="hidden" name="quantity" id="qtyVal" value="1" />
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-artisan btn-lg w-100">Add to Cart</button>
+        </form>
+        <div class="d-flex flex-wrap gap-3 small text-muted">
+            @if (Model.IsSustainable) { <span><i class="fas fa-leaf me-1"></i>SUSTAINABLE CLAY</span> }
+            @if (Model.Artisan != null) { <span><i class="fas fa-user me-1"></i>AUTHENTIC ARTISAN</span> }
+            <span><i class="fas fa-truck me-1"></i>GLOBAL DELIVERY</span>
+            @if (Model.IsHandSigned) { <span><i class="fas fa-signature me-1"></i>HAND-SIGNED</span> }
+        </div>
+        @if (Model.Artisan != null)
+        {
+            <div class="card mt-4 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-secondary me-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: white;">@Model.Artisan.FullName[0]</div>
+                    <div>
+                        <strong>@Model.Artisan.FullName</strong>
+                        <div class="small text-muted">@(Model.Artisan.ArtisanType ?? "ARTISAN")</div>
+                        <p class="small mb-0 mt-1">@(Model.Artisan.BusinessName ?? "Independent Artisan")</p>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="#" class="btn btn-outline-secondary btn-sm">VIEW SHOP</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">FOLLOW ARTISAN</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+        @if (Model.Reviews != null && Model.Reviews.Any())
+{
+    <hr class="my-5" />
+    <h4>Customer Reviews</h4>
+    <p class="text-muted">Real thoughts from our community</p>
+    <div class="row g-3">
+        @foreach (var review in Model.Reviews.Take(2))
+        {
+            <div class="col-md-6">
+                <div class="review-card">
+                    <div class="star-rating mb-2">@for (var i = 0; i < review.Rating; i++) { <i class="fas fa-star"></i> }</div>
+                    <small class="text-muted">@(review.IsVerifiedBuyer ? "VERIFIED BUYER" : "") • @review.CreatedAt.ToString("M")</small>
+                    <p class="mt-2 mb-0">@review.Comment</p>
+                    <strong class="mt-2 d-block">@review.ReviewerName</strong>
+                </div>
+            </div>
+        }
+    </div>
+}
+@{
+    var relatedProducts = ViewBag.RelatedProducts as List<Local_Artisan_MarketPlace.Models.Product> ?? new List<Local_Artisan_MarketPlace.Models.Product>();
+}
+@if (relatedProducts.Any())
+{
+    <hr class="my-5" />
+    <h4>You might also like</h4>
+    <div class="row g-4">
+        @foreach (var p in relatedProducts)
+        {
+            <div class="col-6 col-md-3">
+                <a asp-action="Product" asp-route-id="@p.Id" class="text-decoration-none text-dark">
+                    <div class="card product-card h-100">
+                        <img src="@(p.ImageUrl ?? "/images/placeholder.png")" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@p.Name" />
+                        <div class="card-body">
+                            <h6 class="card-title">@p.Name</h6>
+                            <p class="price mb-0">₹@p.Price.ToString("N2")</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+<script>
+    function changeQty(d) {
+        var inp = document.getElementById('qty');
+        var val = parseInt(inp.value || 1) + d;
+        val = Math.max(1, Math.min(val, @Model.StockQuantity));
+        inp.value = val;
+        document.getElementById('qtyVal').value = val;
+    }
+</script>
+
