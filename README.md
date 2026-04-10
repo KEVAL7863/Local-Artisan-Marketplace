@@ -3,6 +3,8 @@
 
 A full-stack e-commerce web application connecting local artisans with collectors. Built with ASP.NET Core 8.0 MVC.
 
+
+
 ---
 
 ## Tech Stack Overview
