@@ -1,0 +1,285 @@
+@{
+    ViewData["Title"] = "Checkout";
+    var cartItems = ViewBag.CartItems as List<Local_Artisan_Marketplace.Models.CartItem>;
+    decimal subtotal = ViewBag.Subtotal;
+    decimal shipping = subtotal >= 500 ? 0 : 50;
+    decimal tax = Math.Round(subtotal * 0.18m, 2);
+    decimal total = subtotal + shipping + tax;
+}
+
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Navigation -->
+<header class="flex items-center justify-between border-b border-primary/10 bg-background-light dark:bg-background-dark px-6 md:px-20 py-4 sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+        <div class="size-8 text-primary">
+            <span class="material-symbols-outlined text-3xl">storefront</span>
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="text-primary text-xl font-bold leading-tight tracking-tight no-underline hover:text-primary/80">Local Artisan Marketplace</a>
+    </div>
+    <div class="flex flex-1 justify-end gap-8 items-center">
+        <div class="hidden md:flex items-center gap-9">
+            <a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" asp-controller="Product" asp-action="Index">Shop</a>
+        </div>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="bg-primary/10 rounded-full p-2 flex items-center justify-center cursor-pointer">
+                    <span class="material-symbols-outlined text-primary">logout</span>
+                </button>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login" class="bg-primary/10 rounded-full p-2 flex items-center justify-center cursor-pointer no-underline">
+                <span class="material-symbols-outlined text-primary">person</span>
+            </a>
+        }
+    </div>
+</header>
+
+<main class="flex-1 flex justify-center py-8 px-4 md:px-20">
+    <form asp-controller="Cart" asp-action="PlaceOrder" method="post" id="checkoutForm" class="max-w-6xl w-full flex flex-col lg:flex-row gap-12">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="paypalTransactionId" id="paypalTransactionId" />
+        <!-- Left Column: Checkout Steps -->
+        <div class="flex-1 flex flex-col gap-8">
+            <!-- Breadcrumbs / Steps -->
+            <div class="flex flex-wrap items-center gap-2 text-sm font-medium">
+                <a class="text-primary/60 hover:text-primary" asp-controller="Cart" asp-action="Index">Cart</a>
+                <span class="material-symbols-outlined text-xs text-primary/40">chevron_right</span>
+                <span class="text-primary">Shipping & Payment</span>
+                <span class="material-symbols-outlined text-xs text-primary/40">chevron_right</span>
+                <span class="text-slate-400">Review</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight mb-2">Checkout</h1>
+                <p class="text-slate-500 dark:text-slate-400">Step 1 of 2: Shipping & Payment</p>
+            </div>
+            <!-- Shipping Section -->
+            <section class="bg-white dark:bg-white/5 p-6 rounded-xl border border-primary/10 shadow-sm">
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="material-symbols-outlined text-primary">local_shipping</span>
+                    <h2 class="text-xl font-bold">Shipping Information</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-sm font-semibold">First Name</span>
+                        <input name="firstName" required class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="First Name" type="text" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-sm font-semibold">Last Name</span>
+                        <input name="lastName" required class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="Last Name" type="text" />
+                    </label>
+                    <label class="flex flex-col gap-1.5 md:col-span-2">
+                        <span class="text-sm font-semibold">Address</span>
+                        <input name="address" required class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="123 Artisan Way" type="text" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-sm font-semibold">City</span>
+                        <input name="city" required class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="Mumbai" type="text" />
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-sm font-semibold">State</span>
+                            <input name="state" required class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="MH" type="text" />
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-sm font-semibold">ZIP</span>
+                            <input name="zipCode" required class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="400001" type="text" />
+                        </label>
+                    </div>
+                </div>
+            </section>
+            <!-- Payment Section -->
+            <section class="bg-white dark:bg-white/5 p-6 rounded-xl border border-primary/10 shadow-sm">
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="material-symbols-outlined text-primary">payments</span>
+                    <h2 class="text-xl font-bold">Payment Method</h2>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div class="flex gap-4 mb-4">
+                        <label class="flex-1 cursor-pointer group">
+                            <input checked name="paymentMethod" value="Credit Card" type="radio" class="hidden peer" />
+                            <div class="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-primary/10 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <span class="material-symbols-outlined text-3xl mb-1">credit_card</span>
+                                <span class="text-xs font-bold">Credit Card</span>
+                            </div>
+                        </label>
+                        <label class="flex-1 cursor-pointer group">
+                            <input name="paymentMethod" value="PayPal" type="radio" class="hidden peer" />
+                            <div class="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-primary/10 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <span class="material-symbols-outlined text-3xl mb-1">account_balance_wallet</span>
+                                <span class="text-xs font-bold">PayPal</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="creditCardDetails" class="space-y-4">
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-sm font-semibold">Card Number</span>
+                            <div class="relative">
+                                <input class="w-full rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4 pl-12" placeholder="0000 0000 0000 0000" type="text" />
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">credit_card</span>
+                            </div>
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex flex-col gap-1.5">
+                                <span class="text-sm font-semibold">Expiry Date</span>
+                                <input class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="MM/YY" type="text" />
+                            </label>
+                            <label class="flex flex-col gap-1.5">
+                                <span class="text-sm font-semibold">CVC</span>
+                                <input class="rounded-lg border-primary/20 bg-background-light dark:bg-white/5 focus:ring-primary focus:border-primary h-12 px-4" placeholder="123" type="text" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- Right Column: Order Summary -->
+        <aside class="w-full lg:w-[380px] flex flex-col gap-6">
+            <div class="bg-white dark:bg-white/5 p-6 rounded-xl border border-primary/10 shadow-sm sticky top-28">
+                <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+                <!-- Item List -->
+                @if (cartItems != null && cartItems.Count > 0)
+                {
+                    <div class="flex flex-col gap-4 mb-6">
+                        @foreach (var item in cartItems)
+                        {
+                            <div class="flex gap-4">
+                                <div class="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden shrink-0">
+                                    @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                    {
+                                        <img alt="@item.Product.Title" class="w-full h-full object-cover" src="@item.Product.ImageUrl" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                            <span class="material-symbols-outlined">image</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-1 flex flex-col justify-center">
+                                    <p class="text-sm font-bold truncate">@item.Product.Title</p>
+                                    <p class="text-xs text-slate-500">Qty: @item.Quantity</p>
+                                    <p class="text-sm font-semibold mt-1">₹@((item.Product.Price * item.Quantity).ToString("N2"))</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                <hr class="border-primary/10 mb-6" />
+                <!-- Totals -->
+                <div class="flex flex-col gap-3 mb-8">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Subtotal</span>
+                        <span class="font-medium">₹@subtotal.ToString("N2")</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Shipping</span>
+                        @if (shipping == 0)
+                        {
+                            <span class="font-medium text-green-600">Free</span>
+                        }
+                        else
+                        {
+                            <span class="font-medium">₹@shipping.ToString("N2")</span>
+                        }
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Tax (GST 18%)</span>
+                        <span class="font-medium">₹@tax.ToString("N2")</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold mt-2 pt-4 border-t border-primary/10">
+                        <span>Total</span>
+                        <span class="text-primary">₹@total.ToString("N2")</span>
+                    </div>
+                </div>
+                <!-- CTA -->
+                <div id="placeOrderContainer">
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                        <span>Place Order</span>
+                        <span class="material-symbols-outlined">lock</span>
+                    </button>
+                </div>
+                <div id="paypal-button-container" class="hidden mt-4"></div>
+                <p class="text-[10px] text-center text-slate-400 mt-4 leading-relaxed">
+                    By placing your order, you agree to our Terms of Service and Privacy Policy. All items are handmade by local artisans.
+                </p>
+            </div>
+            <!-- Marketplace Trust -->
+            <div class="bg-primary/5 p-4 rounded-lg flex gap-3 items-center">
+                <span class="material-symbols-outlined text-primary">verified_user</span>
+                <div>
+                    <p class="text-xs font-bold">Safe & Secure</p>
+                    <p class="text-[10px] text-slate-600 dark:text-slate-400">SSL Encrypted Payment Processing</p>
+                </div>
+            </div>
+        </aside>
+    </form>
+</main>
+
+<footer class="mt-auto py-10 border-t border-primary/10 text-center">
+    <p class="text-sm text-slate-500">© @DateTime.Now.Year Local Artisan Marketplace. Support your local makers.</p>
+</footer>
+</div>
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=test&currency=INR"></script>
+<script>
+    const checkoutForm = document.getElementById('checkoutForm');
+    const paymentMethods = document.getElementsByName('paymentMethod');
+    const creditCardDetails = document.getElementById('creditCardDetails');
+    const placeOrderContainer = document.getElementById('placeOrderContainer');
+    const paypalButtonContainer = document.getElementById('paypal-button-container');
+
+    function togglePaymentMethod() {
+        const selectedMethod = Array.from(paymentMethods).find(r => r.checked).value;
+        if (selectedMethod === 'PayPal') {
+            creditCardDetails.classList.add('hidden');
+            placeOrderContainer.classList.add('hidden');
+            paypalButtonContainer.classList.remove('hidden');
+        } else {
+            creditCardDetails.classList.remove('hidden');
+            placeOrderContainer.classList.remove('hidden');
+            paypalButtonContainer.classList.add('hidden');
+        }
+    }
+
+    paymentMethods.forEach(radio => {
+        radio.addEventListener('change', togglePaymentMethod);
+    });
+
+    // Initialize PayPal button
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            // Validate form first
+            if (!checkoutForm.checkValidity()) {
+                checkoutForm.reportValidity();
+                return actions.reject();
+            }
+
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '@total.ToString("F2")'
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                document.getElementById('paypalTransactionId').value = details.id;
+                checkoutForm.submit();
+            });
+        },
+        onError: function(err) {
+            console.error('PayPal Error:', err);
+            alert('There was an error with the PayPal payment. Please try again.');
+        }
+    }).render('#paypal-button-container');
+
+    // Initial toggle state
+    togglePaymentMethod();
+</script>

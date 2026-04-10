@@ -1,0 +1,147 @@
+@model Local_Artisan_Marketplace.Models.Product
+@{
+    ViewData["Title"] = Model.Title;
+    var related = ViewBag.RelatedProducts as List<Local_Artisan_Marketplace.Models.Product> ?? new List<Local_Artisan_Marketplace.Models.Product>();
+}
+
+<!-- Navigation -->
+<header class="flex items-center justify-between border-b border-primary/10 px-6 py-4 md:px-20 bg-white dark:bg-background-dark sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+        <a asp-controller="Home" asp-action="Index" class="text-primary text-xl font-bold no-underline flex items-center gap-2">
+            <span class="material-symbols-outlined">storefront</span>
+            Artisan Market
+        </a>
+    </div>
+    <div class="flex items-center gap-4">
+        <a asp-controller="Product" asp-action="Index" class="text-slate-600 text-sm font-medium hover:text-primary">Browse All</a>
+        <a asp-controller="Cart" asp-action="Index" class="flex items-center gap-1 text-slate-600 hover:text-primary">
+            <span class="material-symbols-outlined">shopping_cart</span>
+        </a>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 md:px-8 py-10">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 mb-8 text-sm text-slate-500">
+        <a class="hover:text-primary" asp-controller="Home" asp-action="Index">Home</a>
+        <span class="material-symbols-outlined text-base">chevron_right</span>
+        <a class="hover:text-primary" asp-controller="Product" asp-action="Index">Products</a>
+        <span class="material-symbols-outlined text-base">chevron_right</span>
+        <span class="text-slate-900 dark:text-slate-100 font-medium">@Model.Title</span>
+    </nav>
+
+    <!-- Product Detail -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+        <!-- Product Image -->
+        <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Title" class="w-full h-full object-cover" />
+            }
+            else
+            {
+                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                    <span class="material-symbols-outlined text-6xl text-primary/40">image</span>
+                </div>
+            }
+        </div>
+
+        <!-- Product Info -->
+        <div class="flex flex-col gap-6">
+            <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary uppercase tracking-wide mb-3">
+                    @Model.Category
+                </span>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">@Model.Title</h1>
+                <p class="text-sm text-slate-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">auto_awesome</span>
+                    by @(Model.Artisan?.StudioName ?? Model.Artisan?.FullName ?? "Unknown Artisan")
+                </p>
+            </div>
+
+            <p class="text-4xl font-black text-primary">&#8377;@Model.Price.ToString("N2")</p>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">Description</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">@Model.Description</p>
+                </div>
+            }
+
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-sm @(Model.StockQuantity > 0 ? "text-green-600" : "text-red-500")">circle</span>
+                @if (Model.StockQuantity > 0)
+                {
+                    <span class="text-sm font-medium text-green-700">In Stock (@Model.StockQuantity available)</span>
+                }
+                else
+                {
+                    <span class="text-sm font-medium text-red-600">Out of Stock</span>
+                }
+            </div>
+
+            @if (Model.StockQuantity > 0)
+            {
+                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="flex flex-col gap-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <div class="flex items-center gap-4">
+                        <label class="text-sm font-semibold">Quantity:</label>
+                        <input type="number" name="quantity" value="1" min="1" max="@Model.StockQuantity"
+                               class="w-20 rounded-lg border-primary/20 text-center focus:ring-primary focus:border-primary" />
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined">add_shopping_cart</span>
+                        Add to Cart
+                    </button>
+                </form>
+            }
+
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-primary/10">
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <span class="material-symbols-outlined text-primary">local_shipping</span>
+                    Free shipping over ₹500
+                </div>
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <span class="material-symbols-outlined text-primary">verified_user</span>
+                    Handmade guarantee
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (related.Any())
+    {
+        <section>
+            <h2 class="text-2xl font-bold mb-6">You May Also Like</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                @foreach (var product in related)
+                {
+                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="group no-underline">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 mb-3">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                                    <span class="material-symbols-outlined text-3xl text-primary/40">image</span>
+                                </div>
+                            }
+                        </div>
+                        <p class="text-xs text-slate-500 uppercase tracking-wide">@(product.Artisan?.StudioName ?? product.Artisan?.FullName)</p>
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">@product.Title</h3>
+                        <p class="text-primary font-bold">&#8377;@product.Price.ToString("N2")</p>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+</main>
+
+<footer class="border-t border-primary/10 py-8 text-center mt-12">
+    <p class="text-xs text-slate-400">&copy; 2024 Local Artisan Marketplace. All rights reserved.</p>
+</footer>

@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var artisanName = ViewBag.ArtisanName as string ?? "Artisan";
+    var totalProducts = (int)(ViewBag.TotalProducts ?? 0);
+    var totalOrders = (int)(ViewBag.TotalOrders ?? 0);
+    var totalRevenue = (decimal)(ViewBag.TotalRevenue ?? 0m);
+    var recentOrders = ViewBag.RecentOrders as List<Local_Artisan_Marketplace.Models.OrderItem> ?? new List<Local_Artisan_Marketplace.Models.OrderItem>();
+}
+
+<div class="flex min-h-screen">
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 border-r border-primary/10 bg-white dark:bg-background-dark flex flex-col fixed h-full">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                <span class="material-symbols-outlined">storefront</span>
+            </div>
+            <div>
+                <h1 class="text-sm font-bold uppercase tracking-wider text-primary">Artisan Market</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Seller Dashboard</p>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium" asp-controller="Artisan" asp-action="Dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-primary/5 transition-colors" asp-controller="Artisan" asp-action="MyProducts">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span>My Products</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-primary/5 transition-colors" asp-controller="Artisan" asp-action="AddProduct">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Add Product</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-primary/5 transition-colors" asp-controller="Artisan" asp-action="Orders">
+                <span class="material-symbols-outlined">shopping_bag</span>
+                <span>Orders</span>
+            </a>
+        </nav>
+        <div class="p-6 border-t border-primary/10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-semibold truncate">@artisanName</p>
+                    <p class="text-xs text-slate-500 truncate">Artisan</p>
+                </div>
+            </div>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-primary/20 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-72 flex-1 p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-black tracking-tight">Welcome back, @artisanName!</h2>
+                <p class="text-slate-500 dark:text-slate-400">Here's a quick look at your shop's performance.</p>
+            </div>
+            <a class="bg-primary text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors" asp-controller="Artisan" asp-action="AddProduct">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Add New Product
+            </a>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/10 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">Total Earnings</span>
+                    <span class="material-symbols-outlined text-primary">payments</span>
+                </div>
+                <div class="text-3xl font-bold">₹@totalRevenue.ToString("N2")</div>
+            </div>
+            <div class="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/10 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">Total Products</span>
+                    <span class="material-symbols-outlined text-primary">inventory</span>
+                </div>
+                <div class="text-3xl font-bold">@totalProducts</div>
+            </div>
+            <div class="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/10 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">Recent Orders</span>
+                    <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                </div>
+                <div class="text-3xl font-bold">@totalOrders</div>
+            </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <section class="bg-white dark:bg-slate-800/50 rounded-xl border border-primary/10 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-primary/10 flex justify-between items-center">
+                <h3 class="text-lg font-bold">Recent Orders</h3>
+                <a class="text-primary text-sm font-semibold hover:underline" asp-controller="Artisan" asp-action="Orders">View All Orders</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-background-light dark:bg-background-dark/50">
+                        <tr>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Order #</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Customer</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Date</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Amount</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-primary/5">
+                        @if (recentOrders.Any())
+                        {
+                            @foreach (var item in recentOrders)
+                            {
+                                <tr class="hover:bg-primary/5 transition-colors">
+                                    <td class="px-6 py-4 text-sm font-medium">@item.Order.OrderNumber</td>
+                                    <td class="px-6 py-4 text-sm">@item.Order.Customer.FullName</td>
+                                    <td class="px-6 py-4 text-sm text-slate-500">@item.Order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                    <td class="px-6 py-4 text-sm font-semibold">₹@((item.UnitPrice * item.Quantity).ToString("N2"))</td>
+                                    <td class="px-6 py-4">
+                                        @{
+                                            var badgeClass = item.Order.Status switch
+                                            {
+                                                "Delivered" => "bg-emerald-100 text-emerald-800",
+                                                "Shipped" => "bg-blue-100 text-blue-800",
+                                                "Processing" => "bg-amber-100 text-amber-800",
+                                                _ => "bg-slate-100 text-slate-800"
+                                            };
+                                        }
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @badgeClass">
+                                            @item.Order.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                    <span class="material-symbols-outlined text-4xl text-slate-300 mb-2 block">receipt_long</span>
+                                    No recent orders yet.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>

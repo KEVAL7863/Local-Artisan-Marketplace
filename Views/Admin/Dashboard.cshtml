@@ -1,0 +1,261 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var recentOrders = ViewBag.RecentOrders as List<Local_Artisan_Marketplace.Models.Order> ?? new List<Local_Artisan_Marketplace.Models.Order>();
+    var currentUserName = User.FindFirst(ClaimTypes.Name)?.Value;
+    var currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+}
+
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 border-r border-primary/10 bg-white dark:bg-background-dark/50 overflow-y-auto">
+        <div class="flex flex-col h-full p-4 gap-8">
+            <!-- Brand -->
+            <div class="flex items-center gap-3 px-2">
+                <div class="bg-primary/20 rounded-full flex items-center justify-center p-2">
+                    <span class="material-symbols-outlined text-primary text-3xl">storefront</span>
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-primary text-sm font-bold leading-tight">Artisan Market</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Admin Central</p>
+                </div>
+            </div>
+            <!-- Nav -->
+            <nav class="flex flex-col gap-1">
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Main Menu</p>
+                <a href="/Admin/Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-primary text-white shadow-sm">
+                    <span class="material-symbols-outlined text-xl">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="/Admin/UserManagement" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">group</span>
+                    Users
+                </a>
+                <a href="/Admin/ArtisanApproval" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">brush</span>
+                    Artisans
+                </a>
+                <a href="/Admin/Orders" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                    Orders
+                </a>
+            </nav>
+            <!-- Bottom -->
+            <div class="mt-auto flex flex-col gap-4">
+                <div class="border-t border-primary/10 pt-4">
+                    <div class="flex items-center gap-3 px-2">
+                        <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span class="text-primary text-sm font-bold">@(currentUserName?.Substring(0, 1) ?? "A")</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">@(currentUserName ?? "Admin")</p>
+                            <p class="text-xs text-slate-500 truncate">@(currentUserEmail ?? "")</p>
+                        </div>
+                    </div>
+                    <form asp-action="Logout" asp-controller="Account" method="post" class="mt-3">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                            <span class="material-symbols-outlined text-xl">logout</span>
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Header -->
+        <header class="flex items-center justify-between px-8 py-4 border-b border-primary/10 bg-white dark:bg-background-dark/50 sticky top-0 z-40">
+            <div class="relative w-96">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                <input type="text" placeholder="Search anything..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-background-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+                    @if ((int)(ViewBag.PendingApprovals ?? 0) > 0)
+                    {
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">@ViewBag.PendingApprovals</span>
+                    }
+                </button>
+                <button class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">mail</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 overflow-y-auto p-8">
+            <!-- Page Title -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Overview</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Welcome back! Here's what's happening with your marketplace.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Users -->
+                <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-600 text-2xl">group</span>
+                        </div>
+                        <span class="text-xs font-medium text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.TotalUsers</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Total Users</p>
+                </div>
+                <!-- Total Artisans -->
+                <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-2xl">brush</span>
+                        </div>
+                        <span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">Crafters</span>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.TotalArtisans</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Total Artisans</p>
+                </div>
+                <!-- Pending Approvals -->
+                <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-amber-600 text-2xl">pending_actions</span>
+                        </div>
+                        <span class="text-xs font-medium text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">Pending</span>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.PendingApprovals</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pending Approvals</p>
+                </div>
+                <!-- Total Revenue -->
+                <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-green-600 text-2xl">currency_rupee</span>
+                        </div>
+                        <span class="text-xs font-medium text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">Revenue</span>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 dark:text-white">₹@(((decimal)(ViewBag.TotalRevenue ?? 0m)).ToString("N0"))</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Total Revenue</p>
+                </div>
+            </div>
+
+            <!-- Recent Activity + Market Insights -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Activity -->
+                <div class="lg:col-span-2 bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+                        <a href="/Admin/Orders" class="text-sm text-primary hover:underline font-medium">View All</a>
+                    </div>
+                    <div class="space-y-4">
+                        @if (recentOrders.Any())
+                        {
+                            @foreach (var order in recentOrders)
+                            {
+                                var statusIcon = order.Status switch
+                                {
+                                    "Delivered" => "check_circle",
+                                    "Shipped" => "local_shipping",
+                                    "Paid" => "payments",
+                                    "Processing" => "sync",
+                                    _ => "schedule"
+                                };
+                                var statusColor = order.Status switch
+                                {
+                                    "Delivered" => "text-green-600 bg-green-50",
+                                    "Shipped" => "text-blue-600 bg-blue-50",
+                                    "Paid" => "text-amber-600 bg-amber-50",
+                                    "Processing" => "text-purple-600 bg-purple-50",
+                                    _ => "text-slate-600 bg-slate-50"
+                                };
+                                var customerName = order.Customer?.FullName ?? $"{order.FirstName} {order.LastName}";
+                                var itemCount = order.OrderItems?.Count ?? 0;
+                                var firstProduct = order.OrderItems?.FirstOrDefault()?.Product?.Title ?? "items";
+                                <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <div class="w-10 h-10 rounded-lg @statusColor flex items-center justify-center flex-shrink-0">
+                                        <span class="material-symbols-outlined text-xl">@statusIcon</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                            Order #@order.OrderNumber
+                                            <span class="font-normal text-slate-500">by @customerName</span>
+                                        </p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            @itemCount item(s) — @firstProduct@(itemCount > 1 ? $" + {itemCount - 1} more" : "")
+                                        </p>
+                                        <p class="text-xs text-slate-400 mt-1">@order.OrderDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <p class="text-sm font-bold text-slate-900 dark:text-white">₹@order.TotalAmount.ToString("N0")</p>
+                                        <span class="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full @statusColor">@order.Status</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-8">
+                                <span class="material-symbols-outlined text-slate-300 text-4xl">receipt_long</span>
+                                <p class="text-sm text-slate-400 mt-2">No recent orders</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Market Insights -->
+                <div class="bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Market Insights</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">Total Products</span>
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.TotalProducts</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                                <div class="bg-primary rounded-full h-2" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">Total Orders</span>
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.TotalOrders</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                                <div class="bg-blue-500 rounded-full h-2" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">Active Artisans</span>
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.TotalArtisans</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                                <div class="bg-green-500 rounded-full h-2" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-slate-600 dark:text-slate-400">Pending Approvals</span>
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.PendingApprovals</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                                <div class="bg-amber-500 rounded-full h-2" style="width: 20%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-primary/10">
+                        <div class="flex items-center gap-3 p-3 bg-primary/5 rounded-lg">
+                            <span class="material-symbols-outlined text-primary text-2xl">trending_up</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">Marketplace Growing</p>
+                                <p class="text-xs text-slate-500">Your artisan community is expanding!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

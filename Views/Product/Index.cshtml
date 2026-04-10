@@ -1,0 +1,292 @@
+@model List<Local_Artisan_Marketplace.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var currentCategory = ViewBag.CurrentCategory as string ?? "";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+    var currentSort = ViewBag.CurrentSort as string ?? "";
+    var totalCount = ViewBag.TotalCount ?? Model.Count;
+}
+
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+
+<!-- Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 px-6 py-4 md:px-10 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+    <div class="flex items-center gap-8">
+        <div class="flex items-center gap-4">
+            <div class="text-primary size-8">
+                <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+                </svg>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight no-underline">Artisan Market</a>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+            <a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1" asp-controller="Home" asp-action="Index">
+                <span class="material-symbols-outlined text-xl">arrow_back</span>
+                Back to Home
+            </a>
+            <a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1" asp-controller="Cart" asp-action="Index">
+                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                Cart
+            </a>
+        </div>
+    </div>
+    <div class="flex flex-1 justify-end gap-4 items-center">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <span class="text-sm text-slate-700 dark:text-slate-300 hidden sm:inline">Hello, @User.FindFirst(ClaimTypes.Name)?.Value</span>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all border border-primary/20">
+                    Logout
+                </button>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login" class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all no-underline">
+                Login
+            </a>
+            <a asp-controller="Account" asp-action="Register" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all no-underline">
+                Sign Up
+            </a>
+        }
+    </div>
+</header>
+
+<main class="flex flex-1 px-4 md:px-10 py-8 gap-8 max-w-[1440px] mx-auto w-full">
+
+    <!-- Sidebar Filters -->
+    <aside class="hidden md:flex flex-col w-64 shrink-0 gap-8">
+        <div>
+            <h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-4">Categories</h3>
+            <div class="flex flex-col gap-2">
+                <a asp-controller="Product" asp-action="Index"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg no-underline transition-colors @(string.IsNullOrEmpty(currentCategory) ? "bg-primary text-white" : "hover:bg-primary/10 text-slate-700 dark:text-slate-300")">
+                    <span class="material-symbols-outlined">category</span>
+                    <span class="text-sm font-medium">All Crafts</span>
+                </a>
+                @foreach (var cat in categories)
+                {
+                    <a asp-controller="Product" asp-action="Index" asp-route-category="@cat"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg no-underline transition-colors @(currentCategory == cat ? "bg-primary text-white" : "hover:bg-primary/10 text-slate-700 dark:text-slate-300")">
+                        <span class="material-symbols-outlined">
+                            @switch (cat.ToLower())
+                            {
+                                case "ceramics":
+                                    @:repeat
+                                    break;
+                                case "jewelry":
+                                    @:diamond
+                                    break;
+                                case "woodwork":
+                                    @:forest
+                                    break;
+                                case "textiles":
+                                    @:texture
+                                    break;
+                                case "paintings":
+                                    @:palette
+                                    break;
+                                case "leather":
+                                    @:shopping_bag
+                                    break;
+                                default:
+                                    @:crafts
+                                    break;
+                            }
+                        </span>
+                        <span class="text-sm font-medium">@cat</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <!-- Product Content -->
+    <div class="flex-1">
+
+        <!-- Search and Sort Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                    @(string.IsNullOrEmpty(currentCategory) ? "Handcrafted Goods" : currentCategory)
+                </h1>
+                <p class="text-slate-600 dark:text-slate-400">
+                    @totalCount product@(Convert.ToInt32(totalCount) != 1 ? "s" : "") found
+                    @if (!string.IsNullOrEmpty(currentSearch))
+                    {
+                        <span>for "<strong>@currentSearch</strong>"</span>
+                    }
+                </p>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <!-- Search Form -->
+            <form asp-controller="Product" asp-action="Index" method="get" class="flex flex-1 gap-2">
+                @if (!string.IsNullOrEmpty(currentCategory))
+                {
+                    <input type="hidden" name="category" value="@currentCategory" />
+                }
+                <div class="flex flex-1 items-stretch rounded-lg overflow-hidden border border-primary/20">
+                    <div class="text-primary/60 flex bg-primary/5 items-center justify-center pl-4">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <input type="text" name="search" value="@currentSearch"
+                           class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-primary/5 h-10 placeholder:text-primary/40 px-4 pl-2 text-sm font-normal"
+                           placeholder="Search crafts..." />
+                </div>
+                <button type="submit" class="bg-primary text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors">
+                    Search
+                </button>
+            </form>
+
+            <!-- Sort Dropdown -->
+            <form asp-controller="Product" asp-action="Index" method="get" id="sortForm" class="flex items-center gap-2">
+                @if (!string.IsNullOrEmpty(currentCategory))
+                {
+                    <input type="hidden" name="category" value="@currentCategory" />
+                }
+                @if (!string.IsNullOrEmpty(currentSearch))
+                {
+                    <input type="hidden" name="search" value="@currentSearch" />
+                }
+                <span class="text-sm font-medium text-slate-500 whitespace-nowrap">Sort by:</span>
+                <select name="sortBy" onchange="document.getElementById('sortForm').submit();"
+                        class="form-select rounded-lg border-primary/20 bg-background-light dark:bg-background-dark text-sm focus:border-primary focus:ring-primary w-full md:w-48">
+                    @foreach (var opt in new[] { ("newest", "Newest Arrivals"), ("price_asc", "Price: Low to High"), ("price_desc", "Price: High to Low") })
+                    {
+                        if (currentSort == opt.Item1 || (string.IsNullOrEmpty(currentSort) && opt.Item1 == "newest"))
+                        {
+                            <option value="@opt.Item1" selected>@opt.Item2</option>
+                        }
+                        else
+                        {
+                            <option value="@opt.Item1">@opt.Item2</option>
+                        }
+                    }
+                </select>
+            </form>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <!-- Empty State -->
+            <div class="flex flex-col items-center justify-center py-24 text-center">
+                <span class="material-symbols-outlined text-7xl text-primary/30 mb-4">search_off</span>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">No products found</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-md">
+                    We couldn't find any products matching your criteria. Try adjusting your search or browse a different category.
+                </p>
+                <a asp-controller="Product" asp-action="Index" class="bg-primary text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors no-underline">
+                    Browse All Products
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Product Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                @foreach (var product in Model)
+                {
+                    <div class="group flex flex-col bg-white dark:bg-slate-800/50 rounded-xl overflow-hidden border border-primary/5 hover:shadow-xl transition-shadow">
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="relative aspect-square overflow-hidden block">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img alt="@product.Title" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" src="@product.ImageUrl" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gradient-to-br from-primary/30 via-primary/10 to-primary/40 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-6xl text-primary/40">image</span>
+                                </div>
+                            }
+                        </a>
+                        <div class="p-4 flex flex-col gap-1 flex-1">
+                            <div class="flex justify-between items-start">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors no-underline">
+                                    @product.Title
+                                </a>
+                                <span class="font-bold text-primary text-lg whitespace-nowrap ml-2">&#8377;@product.Price.ToString("N2")</span>
+                            </div>
+                            <p class="text-xs font-medium text-primary/70 uppercase tracking-wide">@product.Category</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                                by @(product.Artisan?.StudioName ?? product.Artisan?.FullName ?? "Unknown Artisan")
+                            </p>
+                            @if (product.StockQuantity <= 0)
+                            {
+                                <button disabled class="mt-auto w-full py-2.5 bg-slate-300 text-slate-500 rounded-lg font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                                    <span class="material-symbols-outlined text-[18px]">remove_shopping_cart</span>
+                                    Out of Stock
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="mt-auto">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <button type="submit" class="w-full py-2.5 bg-primary text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        Add to Cart
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-primary/5 border-t border-primary/10 py-12 px-6 md:px-10 mt-20">
+    <div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-2 text-primary">
+                <span class="material-symbols-outlined">storefront</span>
+                <span class="text-lg font-bold">Artisan Market</span>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Connecting you with the finest local artisans and their unique handcrafted creations. Every piece tells a story of craftsmanship.</p>
+        </div>
+        <div>
+            <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-4">Marketplace</h4>
+            <ul class="flex flex-col gap-2 text-sm text-slate-600 dark:text-slate-400 list-none p-0">
+                <li><a class="hover:text-primary" asp-controller="Product" asp-action="Index">Browse All</a></li>
+                <li><a class="hover:text-primary" asp-controller="Product" asp-action="Index" asp-route-sortBy="newest">New Arrivals</a></li>
+                <li><a class="hover:text-primary" asp-controller="Home" asp-action="Index">Featured Artisans</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-4">Support</h4>
+            <ul class="flex flex-col gap-2 text-sm text-slate-600 dark:text-slate-400 list-none p-0">
+                <li><a class="hover:text-primary" href="#">Shipping Info</a></li>
+                <li><a class="hover:text-primary" href="#">Returns &amp; Exchanges</a></li>
+                <li><a class="hover:text-primary" href="#">Contact Us</a></li>
+                <li><a class="hover:text-primary" href="#">FAQs</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-4">Join Our Journey</h4>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Get the latest stories from our artisans directly in your inbox.</p>
+            <div class="flex gap-2">
+                <input class="form-input flex-1 rounded-lg border-primary/20 bg-white/50 dark:bg-slate-800 focus:ring-primary focus:border-primary text-sm" placeholder="Email address" type="email" />
+                <button class="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm">Join</button>
+            </div>
+        </div>
+    </div>
+    <div class="max-w-[1440px] mx-auto mt-12 pt-8 border-t border-primary/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-xs text-slate-500">&copy; @DateTime.Now.Year Local Artisan Marketplace. All rights reserved.</p>
+        <div class="flex gap-6 text-xs text-slate-500">
+            <a class="hover:text-primary" href="#">Privacy Policy</a>
+            <a class="hover:text-primary" href="#">Terms of Service</a>
+        </div>
+    </div>
+</footer>
+
+</div>
+</div>

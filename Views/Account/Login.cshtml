@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+
+<!-- Header -->
+<header class="flex items-center justify-between border-b border-primary/10 px-6 py-4 lg:px-20 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-3 no-underline">
+        <div class="text-primary">
+            <svg class="size-8" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill-rule="evenodd"></path>
+            </svg>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Local Artisan Marketplace</h1>
+    </a>
+</header>
+
+<main class="flex flex-1 items-center justify-center p-4 lg:p-8">
+    <div class="w-full max-w-[1000px] grid lg:grid-cols-2 bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-xl shadow-primary/5">
+        <!-- Side Image -->
+        <div class="hidden lg:block relative min-h-[500px] bg-primary/10">
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBElCVqBCoXyTdwuvrNjZA7fuT-YH7Vi1SHHcVr52yzMlL90NII_95sNIMu0ZkuKN_G9p0E3j3SB_63ZRhG1G1akoBDmxfrBUSok9r_vlsvyfPa6pdJvxEElDLEthijKpNz18ECjhFrgVt6yoIhgyubJ2fdyJF1P-A51G--mEVZPlFmpKmRGkAINs32bMdWkuZFb8Cqko-YpXHStBzHc0gyIPoUsXUvTqKPJUL_32fAjCXXEzlCVBTvbC4X18tXuxnYGyZgFKAT_8');"></div>
+            <div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+            <div class="absolute bottom-10 left-10 right-10 text-white">
+                <h2 class="text-3xl font-black mb-2">Preserving Craftsmanship</h2>
+                <p class="text-lg opacity-90">Every purchase supports a local creator and keeps a tradition alive.</p>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="flex flex-col justify-center p-8 lg:p-12">
+            <div class="mb-8">
+                <h2 class="text-3xl font-black text-slate-900 dark:text-slate-100">Welcome Back</h2>
+                <p class="text-slate-500 dark:text-slate-400 mt-2">Log in to support your local artisans</p>
+            </div>
+
+            <!-- Validation Errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <ul class="text-sm text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form asp-controller="Account" asp-action="Login" method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
+                    <input name="email" class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-background-light dark:bg-slate-800 text-slate-900 dark:text-slate-100 h-12 px-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="Email Address" type="email" required />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
+                        <a class="text-xs font-medium text-primary hover:underline" href="#">Forgot password?</a>
+                    </div>
+                    <div class="relative group">
+                        <input name="password" id="passwordInput" class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-background-light dark:bg-slate-800 text-slate-900 dark:text-slate-100 h-12 px-4 pr-12 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="Password" type="password" required />
+                        <button id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary flex items-center" type="button">
+                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 py-2">
+                    <input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" id="remember" name="rememberMe" type="checkbox" value="true" />
+                    <label class="text-sm text-slate-600 dark:text-slate-400" for="remember">Remember me for 30 days</label>
+                </div>
+
+                <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-lg transition-colors shadow-lg shadow-primary/20" type="submit">
+                    Sign In
+                </button>
+            </form>
+            <p class="text-center text-sm text-slate-500 mt-6">Don't have an account? <a asp-controller="Account" asp-action="Register" class="text-primary font-bold hover:underline">Sign Up</a></p>
+        </div>
+    </div>
+</main>
+
+<footer class="px-6 py-8 text-center">
+    <p class="text-xs text-slate-400">&copy; 2024 Local Artisan Marketplace. Handcrafted with love.</p>
+</footer>
+
+</div>
+</div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        var input = document.getElementById('passwordInput');
+        var icon = this.querySelector('.material-symbols-outlined');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    });
+</script>

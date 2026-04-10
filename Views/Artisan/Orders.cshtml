@@ -1,0 +1,172 @@
+@model List<Local_Artisan_Marketplace.Models.OrderItem>
+@{
+    ViewData["Title"] = "Orders";
+    var currentStatus = ViewBag.CurrentStatus as string ?? "";
+}
+
+<div class="flex min-h-screen">
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 border-r border-primary/10 bg-white dark:bg-background-dark flex flex-col fixed h-full">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                <span class="material-symbols-outlined">storefront</span>
+            </div>
+            <div>
+                <h1 class="text-sm font-bold uppercase tracking-wider text-primary">Artisan Market</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Seller Dashboard</p>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-primary/5 transition-colors" asp-controller="Artisan" asp-action="Dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-primary/5 transition-colors" asp-controller="Artisan" asp-action="MyProducts">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span>My Products</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-primary/5 transition-colors" asp-controller="Artisan" asp-action="AddProduct">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Add Product</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium" asp-controller="Artisan" asp-action="Orders">
+                <span class="material-symbols-outlined">shopping_bag</span>
+                <span>Orders</span>
+            </a>
+        </nav>
+        <div class="p-6 border-t border-primary/10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-semibold truncate">@User.FindFirst(ClaimTypes.Name)?.Value</p>
+                    <p class="text-xs text-slate-500 truncate">Artisan</p>
+                </div>
+            </div>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-primary/20 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-72 flex-1 p-8 lg:p-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
+            <div>
+                <h2 class="text-3xl font-black tracking-tight mb-1">Orders</h2>
+                <p class="text-slate-500 dark:text-slate-400">Track and manage your customer orders and shipments.</p>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="mb-6 border-b border-primary/10">
+            <div class="flex gap-8">
+                <a class="border-b-2 pb-4 px-1 text-sm font-medium transition-colors @(string.IsNullOrEmpty(currentStatus) ? "border-primary text-primary font-bold" : "border-transparent text-slate-400 hover:text-slate-600")"
+                   asp-controller="Artisan" asp-action="Orders">All Orders</a>
+                <a class="border-b-2 pb-4 px-1 text-sm font-medium transition-colors @(currentStatus == "Processing" ? "border-primary text-primary font-bold" : "border-transparent text-slate-400 hover:text-slate-600")"
+                   asp-controller="Artisan" asp-action="Orders" asp-route-status="Processing">Processing</a>
+                <a class="border-b-2 pb-4 px-1 text-sm font-medium transition-colors @(currentStatus == "Shipped" ? "border-primary text-primary font-bold" : "border-transparent text-slate-400 hover:text-slate-600")"
+                   asp-controller="Artisan" asp-action="Orders" asp-route-status="Shipped">Shipped</a>
+                <a class="border-b-2 pb-4 px-1 text-sm font-medium transition-colors @(currentStatus == "Delivered" ? "border-primary text-primary font-bold" : "border-transparent text-slate-400 hover:text-slate-600")"
+                   asp-controller="Artisan" asp-action="Orders" asp-route-status="Delivered">Delivered</a>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-primary/10 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-primary/5 border-b border-primary/10">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Order #</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Customer</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Product</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Amount</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-primary/5">
+                            @foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-primary/5 transition-colors">
+                                    <td class="px-6 py-5 text-sm font-semibold text-primary">@item.Order.OrderNumber</td>
+                                    <td class="px-6 py-5 text-sm text-slate-700 dark:text-slate-300">@item.Order.Customer.FullName</td>
+                                    <td class="px-6 py-5 text-sm text-slate-700 dark:text-slate-300">@item.Product.Title</td>
+                                    <td class="px-6 py-5 text-sm text-slate-500 dark:text-slate-400">@item.Order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                    <td class="px-6 py-5 text-sm font-bold text-slate-900 dark:text-slate-100">₹@((item.UnitPrice * item.Quantity).ToString("N2"))</td>
+                                    <td class="px-6 py-5">
+                                        @{
+                                            var statusBadge = item.Order.Status switch
+                                            {
+                                                "Delivered" => "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+                                                "Shipped" => "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+                                                "Processing" => "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+                                                _ => "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                                            };
+                                        }
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold @statusBadge">
+                                            @item.Order.Status
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <form asp-controller="Artisan" asp-action="UpdateOrderStatus" method="post" class="flex items-center justify-end gap-2">
+                                            <input type="hidden" name="orderId" value="@item.Order.Id" />
+                                            <select name="status"
+                                                    class="rounded-lg border border-primary/10 bg-white dark:bg-slate-900 focus:border-primary focus:ring-primary text-xs py-1.5 px-2 transition-all">
+                                                @foreach (var s in new[] { "Processing", "Shipped", "Delivered" })
+                                                {
+                                                    if (item.Order.Status == s)
+                                                    {
+                                                        <option value="@s" selected>@s</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@s">@s</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <button type="submit"
+                                                    class="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors">
+                                                Update
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-primary/10 shadow-sm p-16 text-center">
+                <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-6">
+                    <span class="material-symbols-outlined text-4xl">shopping_bag</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2">No Orders Found</h3>
+                <p class="text-slate-500 mb-6">
+                    @if (!string.IsNullOrEmpty(currentStatus))
+                    {
+                        <span>No orders with status "@currentStatus". </span>
+                        <a asp-controller="Artisan" asp-action="Orders" class="text-primary font-semibold hover:underline">View all orders</a>
+                    }
+                    else
+                    {
+                        <span>You haven't received any orders yet. Keep listing great products!</span>
+                    }
+                </p>
+            </div>
+        }
+    </main>
+</div>

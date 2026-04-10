@@ -1,0 +1,297 @@
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_Layout";
+    var products = ViewBag.FeaturedProducts as List<Product> ?? new List<Product>();
+    var isSignedIn = User.Identity?.IsAuthenticated == true;
+    var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+    var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+
+<!-- Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 px-6 py-4 md:px-20 lg:px-40 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+    <div class="flex items-center gap-8">
+        <div class="flex items-center gap-4">
+            <div class="text-primary size-8">
+                <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+                </svg>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight no-underline">Artisan Market</a>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+            <a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" asp-controller="Product" asp-action="Index">Categories</a>
+            <a asp-controller="Cart" asp-action="Index" class="flex items-center gap-1 group cursor-pointer no-underline">
+                <span class="material-symbols-outlined text-xl text-slate-700 dark:text-slate-300 group-hover:text-primary">shopping_cart</span>
+                <span class="text-slate-700 dark:text-slate-300 text-sm font-medium group-hover:text-primary">Cart</span>
+            </a>
+        </div>
+    </div>
+    <div class="flex flex-1 justify-end gap-4 md:gap-8 items-center">
+        <!-- Search box -->
+        <label class="hidden lg:flex flex-col min-w-40 !h-10 max-w-64">
+            <form asp-controller="Product" asp-action="Index" method="get" class="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden">
+                <div class="text-primary/60 flex bg-primary/5 items-center justify-center pl-4 border-r-0">
+                    <span class="material-symbols-outlined">search</span>
+                </div>
+                <input name="search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-primary/5 h-full placeholder:text-primary/40 px-4 pl-2 text-sm font-normal" placeholder="Search crafts..." />
+            </form>
+        </label>
+        <!-- Auth buttons -->
+        <div class="flex gap-2">
+            @if (isSignedIn)
+            {
+                <span class="hidden sm:flex items-center text-sm text-slate-600 dark:text-slate-400 font-medium">
+                    Hello, @userName
+                </span>
+                @if (userRole == "Admin")
+                {
+                    <a asp-controller="Admin" asp-action="Dashboard" class="hidden sm:flex min-w-[100px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all border border-primary/20 no-underline">
+                        <span>Admin Panel</span>
+                    </a>
+                }
+                else if (userRole == "Artisan")
+                {
+                    <a asp-controller="Artisan" asp-action="Dashboard" class="hidden sm:flex min-w-[100px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all border border-primary/20 no-underline">
+                        <span>Dashboard</span>
+                    </a>
+                }
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all">
+                        <span>Logout</span>
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Register" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all no-underline">
+                    <span>Sign Up</span>
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all no-underline">
+                    <span>Login</span>
+                </a>
+            }
+        </div>
+    </div>
+</header>
+
+<main class="flex flex-col flex-1 px-4 md:px-20 lg:px-40 py-8">
+
+<!-- Hero Section -->
+<section class="w-full mb-12">
+    <div class="relative min-h-[520px] flex flex-col items-center justify-center rounded-xl overflow-hidden shadow-2xl">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" style='background-image: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDB4d9iV4kzfwXvJbQQKEPdb9hVqI7BOfUO_EGNnFRuZp47iMmI5mL0pBdMrHEWOE2iQNrksxTUfUcIWEaVufOAXlpz60XY49Efy58Ex7dcQcKd0MPXFBPw2wUaqn0hkU0N-eg4NfyerKLwIWNOaVXD3eXWbj-2SweTuXudnpWcOsTNBgXfzRCij0QXJ0Q5nBFMzwtYEjxSPVLMGmf1CnDLt4wjpedj79bbWzgANr05COkGv9oyvppWH8b9d1OxRk6OsRVjB8qln0A");'>
+        </div>
+        <div class="relative z-10 flex flex-col gap-6 text-center max-w-2xl px-6">
+            <h1 class="text-white text-5xl md:text-6xl font-black leading-tight tracking-tight">
+                Handcrafted with Passion
+            </h1>
+            <p class="text-white/90 text-lg md:text-xl font-medium leading-relaxed">
+                Discover unique treasures from local artisans in your community.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-stretch mt-4">
+                <div class="relative flex-1 max-w-md">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="material-symbols-outlined text-slate-400">search</span>
+                    </div>
+                    <input class="block w-full pl-10 pr-3 py-4 border-none rounded-lg text-slate-900 bg-white shadow-lg focus:ring-2 focus:ring-primary text-base" placeholder="What are you looking for today?" type="text" />
+                </div>
+                <a asp-controller="Product" asp-action="Index" class="flex items-center justify-center rounded-lg h-14 px-8 bg-primary text-white text-lg font-bold shadow-lg hover:bg-primary/90 transition-all transform hover:-translate-y-1 no-underline">
+                    Shop Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Artisans -->
+<section class="mb-16">
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h2 class="text-slate-900 dark:text-slate-100 text-3xl font-bold tracking-tight">Featured Artisans</h2>
+            <p class="text-slate-500 dark:text-slate-400 mt-2">Meet the hands behind your favorite pieces.</p>
+        </div>
+        <a class="text-primary font-bold flex items-center gap-1 hover:underline no-underline" asp-controller="Product" asp-action="Index">
+            View All <span class="material-symbols-outlined">chevron_right</span>
+        </a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
+        <!-- Artisan 1 -->
+        <div class="flex flex-col items-center gap-3 group cursor-pointer">
+            <div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg group-hover:border-primary transition-all">
+                <img alt="Artisan Portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnWIeNh2y2x6DILcW_B63S1HKp9zNlSEfikn3LYbD_khejYdpbz1bzqU1IK12ht2j4h8Sg5DdpjGikRLa-8wOvbEtPAApT0ilgVSIe-bnjuFdjbedxJu7BORjFjI-Nl7S2Q0ehNG-dPrsuoNOWsQH9RlpJYbuPZk6zhvus2N20yANC6jyrwHbgDqtTQPHCzk-DPAzBLdEA2V9yMXaH5HZQHSdDGO-QYzMWgtMmrOaaRzp0W290plrbKVz6Pc5GJpOIG7IwRvVy2KY" />
+            </div>
+            <div class="text-center">
+                <p class="text-slate-900 dark:text-slate-100 font-bold text-lg">Keval Ceramics</p>
+                <p class="text-primary text-sm font-medium italic">Master Potter</p>
+            </div>
+        </div>
+        <!-- Artisan 2 -->
+        <div class="flex flex-col items-center gap-3 group cursor-pointer">
+            <div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg group-hover:border-primary transition-all">
+                <img alt="Artisan Portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0lYvfGlS1SWWMXe4b2LjNqFYyJkBN92aLfA_XJ5ujFPX4mWNF1q0qfaPMDYsesYryYq91PHl8_myaqjHHPmVY9_LDuzj8US1C_Xlsr0U3IHm-6IDqmgvFhGm_MC_zXKwhHaleNRAex57iqgmh1oKrzwF3uEXaAc_NmPNcONCZB7yIc3K9STMbHX3bEndO1d5tpRO4RbsuJwIXJbuUvpYpFENjnqEyhIlcJP7Xo5OaetxYgFLgUDBCuSTXnb9U5H-khC8t76OUfU4" />
+            </div>
+            <div class="text-center">
+                <p class="text-slate-900 dark:text-slate-100 font-bold text-lg">Raj Woodworks</p>
+                <p class="text-primary text-sm font-medium italic">Wood Sculptor</p>
+            </div>
+        </div>
+        <!-- Artisan 3 -->
+        <div class="flex flex-col items-center gap-3 group cursor-pointer">
+            <div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg group-hover:border-primary transition-all">
+                <img alt="Artisan Portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkuo2nTRAeLtbItJm2a7ahT8qRezwFjusibU19Z-JHMlh_9AGkUOonjLRNzOEvKzLSDpnDVGT48uRm_Q6vCnWIhM0VM-1St778bcyvrtUskrvrW8s42JmXozHS78cI1I-cgy0-pWSC1K4DpkZK0k9kQsPyuGMjU4G9iHttbKUzuho9XVpC1O8tHMtML_NQ6t27o2I_9PKPDPtvcOtLAknJjB-84QXsidaOpk5QnGKZfXeodxIt1Ek-rAdTfojA8As-iHi4H-Qbv7c" />
+            </div>
+            <div class="text-center">
+                <p class="text-slate-900 dark:text-slate-100 font-bold text-lg">Parth Silver</p>
+                <p class="text-primary text-sm font-medium italic">Silversmith</p>
+            </div>
+        </div>
+        <!-- Artisan 4 -->
+        <div class="flex flex-col items-center gap-3 group cursor-pointer">
+            <div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg group-hover:border-primary transition-all">
+                <img alt="Artisan Portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtP6CScouM5TFBq-RmDs7UI3-tjCIbK-2-reYbMnHG_uDI-bSUI_1jxwgm_EBgPEaV-k6ClJ3MCiSvIHBUo-ITjl5BfvZ3i3HJU5Ir3cadjwALFh6XCpHriHwJJlcSX9ZIrbLeAVdPezEiv7UVA0LOVbk9Zfsod7yh2wJ15JDE0avILKQtmFPwL-o2yCj_OrYA-jY7_4RARUYRzhWRBcRcgLnEetrNLyRT-G2bpObxYBSQWbjuCUf49HjRaXkjMfb9BbVVa1N_BGI" />
+            </div>
+            <div class="text-center">
+                <p class="text-slate-900 dark:text-slate-100 font-bold text-lg">Saddle Co.</p>
+                <p class="text-primary text-sm font-medium italic">Leather Craftsman</p>
+            </div>
+        </div>
+        <!-- Artisan 5 -->
+        <div class="flex flex-col items-center gap-3 group cursor-pointer">
+            <div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg group-hover:border-primary transition-all">
+                <img alt="Artisan Portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7wjeefORozMN3d4kHJBNiJekK9rsR_3Wv6k-L_ibydJ6lOok-DOIUc_klKo_XPU-ua7rPUkxRmZQX0ctJ9WH5uGmNe7uf3EnExamFMSX9HgKrX5fqtcbghDIgFJaEt1hLvhzfBLyZLPRum12C7rpM1Ji5Ulpgaaj0f_yU0sRkK62reWmBkcLlruELj7I4963JzJeigZT42eU7SODj9R8F5MDYSSh7Lcx0WTb0iOpxijzvJ6p4o-dFXoYT6aINY8zXfa3KjkEmzng" />
+            </div>
+            <div class="text-center">
+                <p class="text-slate-900 dark:text-slate-100 font-bold text-lg">Ravi Textiles</p>
+                <p class="text-primary text-sm font-medium italic">Textile Weaver</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Products -->
+<section class="mb-16">
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h2 class="text-slate-900 dark:text-slate-100 text-3xl font-bold tracking-tight">Trending Products</h2>
+            <p class="text-slate-500 dark:text-slate-400 mt-2">The most loved items this week.</p>
+        </div>
+    </div>
+    @if (products.Any())
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @foreach (var product in products)
+            {
+                <div class="group">
+                    <div class="relative aspect-[4/5] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 mb-4">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img alt="@product.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="@product.ImageUrl" />
+                        }
+                        else
+                        {
+                            <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                <span class="material-symbols-outlined text-6xl">image</span>
+                            </div>
+                        }
+                        <div class="absolute top-3 right-3">
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-2 rounded-full text-slate-900 dark:text-white hover:bg-primary hover:text-white transition-colors" title="Add to Cart">
+                                    <span class="material-symbols-outlined">add_shopping_cart</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="flex flex-col gap-1 no-underline">
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">@(product.Artisan?.StudioName ?? product.Artisan?.FullName ?? "Artisan")</p>
+                        <h3 class="text-slate-900 dark:text-slate-100 font-bold text-lg group-hover:text-primary transition-colors">@product.Title</h3>
+                        <p class="text-primary font-black text-xl">&#8377;@product.Price.ToString("N2")</p>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-16">
+            <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">inventory_2</span>
+            <p class="text-slate-500 dark:text-slate-400 mt-4 text-lg">No products available yet.</p>
+        </div>
+    }
+</section>
+
+<!-- Newsletter / Community Section -->
+<section class="mb-16 bg-primary/10 rounded-2xl p-8 md:p-12">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="max-w-md">
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">Join the Artisan Community</h2>
+            <p class="text-slate-600 dark:text-slate-400">Get early access to limited edition drops and stories from our local makers delivered to your inbox.</p>
+        </div>
+        <div class="flex w-full md:w-auto gap-2">
+            <input class="flex-1 md:min-w-[300px] rounded-lg border-primary/20 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-primary h-12 px-4" placeholder="Your email address" type="email" />
+            <button class="bg-primary text-white font-bold px-6 py-3 rounded-lg hover:bg-primary/90 transition-all">Subscribe</button>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<!-- Footer -->
+<footer class="mt-24 border-t border-primary/10 bg-white dark:bg-background-dark py-12">
+    <div class="mx-auto max-w-7xl px-6 md:px-20 lg:px-40">
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-4">
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 text-primary">
+                    <span class="material-symbols-outlined">storefront</span>
+                    <span class="text-lg font-bold">Artisan Market</span>
+                </div>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Supporting independent makers and preserving traditional crafts since 2018. Every purchase makes a difference in an artisan's life.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-slate-100">Marketplace</h4>
+                <ul class="mt-4 space-y-2 text-sm text-slate-500">
+                    <li><a class="hover:text-primary transition-colors" asp-controller="Product" asp-action="Index">Browse All</a></li>
+                    <li><a class="hover:text-primary transition-colors" asp-controller="Product" asp-action="Index">New Arrivals</a></li>
+                    <li><a class="hover:text-primary transition-colors" asp-controller="Product" asp-action="Index">Featured Artisans</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Gift Cards</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-slate-100">Support</h4>
+                <ul class="mt-4 space-y-2 text-sm text-slate-500">
+                    <li><a class="hover:text-primary transition-colors" href="#">Shipping Info</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Returns &amp; Exchanges</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-slate-100">Join Our Journey</h4>
+                <p class="mt-4 text-sm text-slate-500">Get the latest stories from our artisans directly in your inbox.</p>
+                <div class="mt-4 flex gap-2">
+                    <input class="w-full rounded-lg border-primary/10 bg-primary/5 p-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Email address" type="email" />
+                    <button class="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90 transition-colors">Join</button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-12 border-t border-primary/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-xs text-slate-400">&copy; 2024 Local Artisan Marketplace. All rights reserved.</p>
+            <div class="flex gap-6 text-xs text-slate-400">
+                <a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+                <a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+                <a class="hover:text-primary transition-colors" href="#">Cookie Settings</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</div>
+</div>
