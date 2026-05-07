@@ -19,6 +19,7 @@ A full-stack e-commerce web application connecting local artisans with collector
 | ASP.NET Core Identity | 8.0.0 | Authentication & authorization (login, register, roles) |
 | SQL Server LocalDB | 15.x | Database engine (development) |
 
+
 ### Frontend
 | Technology | Version | Use Case |
 |-----------|---------|----------|
@@ -234,8 +235,6 @@ options.Password.RequireUppercase = false;
 options.Password.RequireNonAlphanumeric = false;
 options.Password.RequiredLength = 6;
 ```
-
----
 
 ### Step 7: Database & ORM - Entity Framework Core + SQL Server
 
